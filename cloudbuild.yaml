@@ -1,0 +1,47 @@
+# Define user-specified substitutions here.
+# They can be overridden at trigger time if needed.
+substitutions:
+  _REGION: us-central1
+  _REPOSITORY: cf-app-repo
+  _IMAGE_NAME: cf-brews
+
+steps:
+  # 1. Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--pull'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:latest'
+      - '.'
+
+  # 2. Push the image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:latest'
+
+  # 3. Deploy the new image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_IMAGE_NAME}'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:latest'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--port=8500'
+      - '--allow-unauthenticated'
+      - '--vpc-connector=${_IMAGE_NAME}-connector'
+      - '--min-instances=1'
+      - '--vpc-egress=private-ranges-only'
+      - '--set-env-vars=acceptEULA=YES,setting_requestTimeOut=120,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_REGION=${_REGION}'
+      - '--set-secrets=password=cf-admin-password:latest,DB_USER=alloydb-user:latest,DB_PASS=alloydb-pass:latest,DB_IP=alloydb-ip:latest,ALLOYDB_CA_DATA_AGENT_ID=alloydb-ca-data-agent-id:latest,BIGQUERY_CONNECTION_ID=bigquery-connection-id:latest,VERTEX_ENDPOINT_ID=vertex-endpoint-id:latest'
+      - '--startup-probe=httpGet.path=/health.cfm,initialDelaySeconds=90,failureThreshold=30,timeoutSeconds=10'
+      - '--cpu-boost'
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:latest'
+
+timeout: 600s

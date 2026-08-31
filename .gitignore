@@ -1,0 +1,30 @@
+# Environment and secrets
+.env
+.env.*
+*.env
+!.env.example
+*.key
+*.pem
+*service-account*.json
+*credentials*.json
+
+# ColdFusion & Lucee temporary files / logs
+/opt/coldfusion/cfusion/logs/
+*.log
+/WEB-INF/cfclasses/
+/WEB-INF/cftags/
+/WEB-INF/lucee/
+/WEB-INF/debug/
+lucee-temp/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.agents/
+.gemini/
