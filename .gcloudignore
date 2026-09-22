@@ -1,0 +1,9 @@
+.git
+.gitignore
+.DS_Store
+*.md
+*.MD
+**/*.md
+**/*.MD
+*.sql
+**/*.sql

@@ -1,0 +1,13 @@
+.git
+.gitignore
+.dockerignore
+.gcloudignore
+.DS_Store
+Dockerfile
+cloudbuild.yaml
+*.md
+*.MD
+**/*.md
+**/*.MD
+*.sql
+**/*.sql
